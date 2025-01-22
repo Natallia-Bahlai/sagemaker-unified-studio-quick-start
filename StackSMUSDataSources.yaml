@@ -1,0 +1,204 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Guidance to create demo data sources for Amazon SageMaker Unified Studio"
+Parameters:
+
+  RDSPort:
+    Type: Number
+    Default: 5432
+    Description: The port Aurora PostgreSQL is listening on.
+
+  RDSEngineVersion:
+    Type: String
+    Default: "16.4"
+    Description: The Aurora PostgreSQL engine version.
+
+  SecurityGroupId:
+    Type: String
+    Description: Project's SecurityGroupId
+
+  VpcId:
+    Type: String
+    Description: VpcId associated with the SageMaker Domain
+
+  PublicSubnet1:
+    Type: String
+    Description: PublicSubnet1
+
+  PublicSubnet2:
+    Type: String
+    Description: PublicSubnet1
+
+  PublicSubnet3:
+    Type: String
+    Description: PublicSubnet1
+
+  AmazonDataZoneProject:
+    Type: String
+    Description: The Project Tag value applied to all resources.
+    
+  ProjectRoleARN:
+    Type: String
+    Description: The Project IAM Role ARN.
+
+Resources:
+
+  RDSDBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      DBSubnetGroupDescription: "Amazon RDS Subnet Group"
+      DBSubnetGroupName: !Sub "default-${VpcId}"
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+
+  RDSCluster:
+    Type: "AWS::RDS::DBCluster"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    DependsOn: RDSDBSubnetGroup
+    Properties:
+      DBClusterIdentifier: aurorapg-cluster
+      ManageMasterUserPassword: true
+      MasterUsername: "postgres"
+      Engine: "aurora-postgresql"
+      EngineVersion: !Ref RDSEngineVersion
+      EnableHttpEndpoint: false
+      Port: !Ref RDSPort
+      DBSubnetGroupName: !Ref RDSDBSubnetGroup
+      DBClusterParameterGroupName: !Ref ZeroETLDBClusterParameterGroup
+      VpcSecurityGroupIds:
+        - !Ref SecurityGroupId
+      Tags:
+        - Key: "AmazonDataZoneProject"
+          Value: !Ref AmazonDataZoneProject
+      
+  RDSDBInstance:
+    Type: "AWS::RDS::DBInstance"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    DependsOn: RDSCluster
+    Properties:
+      DBInstanceIdentifier: aurorapg-instance
+      #DBName: "postgres"
+      Engine: "aurora-postgresql"
+      DBClusterIdentifier: !Ref RDSCluster
+      PubliclyAccessible: true
+      DBInstanceClass: "db.t4g.medium"
+      MonitoringInterval: 0
+      Tags:
+        - Key: "AmazonDataZoneProject"
+          Value: !Ref AmazonDataZoneProject
+
+  RedshiftServerlessNS:
+    Type: AWS::RedshiftServerless::Namespace
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      NamespaceName: "dwh-ns"
+      DbName: "dev"
+      DefaultIamRoleArn: !Ref ProjectRoleARN
+      IamRoles:
+        - !Ref ProjectRoleARN
+      ManageAdminPassword: true
+      Tags:
+        - Key: AmazonDataZoneProject
+          Value: !Ref AmazonDataZoneProject
+      NamespaceResourcePolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service: "redshift.amazonaws.com"
+          Action: "redshift:AuthorizeInboundIntegration"
+          Condition:
+            StringEquals:
+              aws:SourceArn: !GetAtt RDSCluster.DBClusterArn
+        - Effect: "Allow"
+          Principal:
+            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          Action: "redshift:CreateInboundIntegration"
+
+  RedshiftServerlessWG:
+    Type: AWS::RedshiftServerless::Workgroup
+    DependsOn: RedshiftServerlessNS
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      WorkgroupName: "dwh-wg"
+      NamespaceName: !Ref RedshiftServerlessNS
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      BaseCapacity: 8
+      MaxCapacity: 512
+      PubliclyAccessible: false
+      ConfigParameters:
+        - ParameterKey: enable_case_sensitive_identifier
+          ParameterValue: true
+      Tags:
+        - Key: AmazonDataZoneProject
+          Value: !Ref AmazonDataZoneProject
+
+  ZeroETLDBClusterParameterGroup:    
+    Type: AWS::RDS::DBClusterParameterGroup
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      DBClusterParameterGroupName: "zetl-dbcluster-params"
+      Description: Aurora Cluster Parameter Group to support Zero-ETL
+      Family: aurora-postgresql16
+      Parameters:
+        aurora.logical_replication_globaldb: 0
+        aurora.logical_replication_backup: 0
+        aurora.enhanced_logical_replication: 1
+        rds.logical_replication: 1
+
+  ZeroETLPG2Redshift:
+    Type: AWS::RDS::Integration
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    DependsOn: ["RDSDBInstance","RedshiftServerlessWG"]
+    Properties:
+      DataFilter: "include: postgres.public.*"
+      Description: "Zero-ETL integration between Aurora PostgreSQL and Redshift to replicate retail data"
+      IntegrationName: "zetlpg"
+      SourceArn: !GetAtt RDSCluster.DBClusterArn
+      TargetArn: !GetAtt RedshiftServerlessNS.Namespace.NamespaceArn
+      Tags:
+        - Key: AmazonDataZoneProject
+          Value: !Ref AmazonDataZoneProject
+          
+Outputs:
+  AuroraPGHost:
+    Description: The Aurora PostgreSQL host.
+    Value: !GetAtt RDSCluster.Endpoint.Address
+    
+  AuroraPGPort:
+    Description: The Aurora PostgreSQL port.
+    Value: !GetAtt RDSCluster.Endpoint.Port
+    
+  AuroraPGDatabase:
+    Description: The Aurora PostgreSQL database name.
+    Value: "postgres"
+    
+  AuroraPGSecretArn:
+    Description: The Aurora PostgreSQL secret arn.
+    Value: !GetAtt RDSCluster.MasterUserSecret.SecretArn
+
+  RedshiftHost:
+    Description: The Redshift Serverless host.
+    Value: !GetAtt RedshiftServerlessWG.Workgroup.Endpoint.Address
+
+  RedshiftDatabase:
+    Description: The Redshift Serverless database name.
+    Value: !GetAtt RedshiftServerlessNS.Namespace.DbName
+    
+  RedshiftSecretArn:
+    Description: The Redshift Serverless secret arn.
+    Value: !GetAtt RedshiftServerlessNS.Namespace.DefaultIamRoleArn

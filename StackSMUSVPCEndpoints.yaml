@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Guidance to create VPC endpoints for federated demo data sources"
+Parameters:
+  SecurityGroupId:
+    Type: String
+    Description: Project's SecurityGroupId
+
+  VpcId:
+    Type: String
+    Description: VpcId associated with the SageMaker Domain
+
+  PublicSubnet1:
+    Type: String
+    Description: PublicSubnet1
+
+  PublicSubnet2:
+    Type: String
+    Description: PublicSubnet1
+
+  PublicSubnet3:
+    Type: String
+    Description: PublicSubnet1
+
+Resources:        
+  VPCEndpointSecretsManager:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.secretsmanager"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId          
+
+  VPCEndpointSTS:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.sts"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+
+  VPCEndpointGlue:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.glue"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId 
+
+  VPCEndpointRDSData:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.rds-data"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId 
+
+  VPCEndpointRedshiftData:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.redshift-data"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId        
