@@ -2,23 +2,15 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: "Guidance to create VPC endpoints for federated demo data sources"
 Parameters:
   SecurityGroupId:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
     Description: Project's SecurityGroupId
 
   VpcId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
     Description: VpcId associated with the SageMaker Domain
 
-  PublicSubnet1:
-    Type: String
-    Description: PublicSubnet1
-
-  PublicSubnet2:
-    Type: String
-    Description: PublicSubnet1
-
-  PublicSubnet3:
-    Type: String
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
     Description: PublicSubnet1
 
 Resources:        
@@ -41,10 +33,7 @@ Resources:
             }
           ]
         }
-      SubnetIds:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-        - !Ref PublicSubnet3
+      SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref SecurityGroupId          
@@ -68,10 +57,7 @@ Resources:
             }
           ]
         }
-      SubnetIds:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-        - !Ref PublicSubnet3
+      SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref SecurityGroupId
@@ -95,10 +81,7 @@ Resources:
             }
           ]
         }
-      SubnetIds:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-        - !Ref PublicSubnet3
+      SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref SecurityGroupId 
@@ -122,10 +105,7 @@ Resources:
             }
           ]
         }
-      SubnetIds:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-        - !Ref PublicSubnet3
+      SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref SecurityGroupId 
@@ -149,10 +129,31 @@ Resources:
             }
           ]
         }
-      SubnetIds:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-        - !Ref PublicSubnet3
+      SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
-        - !Ref SecurityGroupId        
+        - !Ref SecurityGroupId 
+
+  VPCEndpointRedshiftServerless:
+    Type: "AWS::EC2::VPCEndpoint"
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      VpcEndpointType: "Interface"
+      VpcId: !Ref VpcId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.redshift-serverless"
+      PolicyDocument: |
+        {
+          "Statement": [
+            {
+              "Action": "*", 
+              "Effect": "Allow", 
+              "Principal": "*", 
+              "Resource": "*"
+            }
+          ]
+        }
+      SubnetIds: !Ref SubnetIds
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
