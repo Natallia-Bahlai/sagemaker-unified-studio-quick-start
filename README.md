@@ -59,11 +59,11 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 ### Deployment
 
 1.	Collect the following inputs which will be required as inputs in the CloudFormation template:
-- VPC ID where we provisioned SageMaker Domain
-- Subnet IDs
-- Security Group ID from Security Group with name datazone-{ProjectID}-dev
-- Project ID
-- Project IAM Role ARN
+- [x] VPC ID where we provisioned SageMaker Domain
+- [x] Subnet IDs
+- [x] Security Group ID from Security Group with name datazone-{ProjectID}-dev
+- [x] Project ID
+- [x] Project IAM Role ARN
 2.	Deploy provided CloudFormation Template and specify parameters
 3.	Review Output parameters
 
