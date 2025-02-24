@@ -64,7 +64,7 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 - [x] Security Group ID from Security Group with name datazone-{ProjectID}-dev
 - [x] Project ID
 - [x] Project IAM Role ARN
-2.	Deploy provided CloudFormation Template and specify parameters
+2.	Deploy provided CloudFormation Templates: [StackSMUSDataSources.yaml](cloudformation/StackSMUSDataSources.yaml), [StackSMUSVPCEndpoints.yaml](cloudformation/StackSMUSVPCEndpoints.yaml)  and specify parameters
 3.	Review Output parameters
 
 ### Post Deployment
