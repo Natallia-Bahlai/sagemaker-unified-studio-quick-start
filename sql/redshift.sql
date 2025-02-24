@@ -4,6 +4,27 @@ CREATE TABLE categories (
   description VARCHAR(255),
   primary key(category_id)
 );
+CREATE TABLE products (
+  product_id INTEGER NOT NULL,
+  product_name VARCHAR(255),
+  category_id INTEGER,
+  unit VARCHAR(255),
+  price DECIMAL(10, 2),
+  primary key(product_id)
+);
+CREATE TABLE orders (
+  order_id INTEGER NOT NULL,
+  customer_id INTEGER,
+  order_date DATE,
+  primary key(order_id)
+);
+CREATE TABLE order_details (
+  order_detail_id INTEGER IDENTITY NOT NULL,
+  order_id INTEGER,
+  product_id INTEGER,
+  quantity INTEGER,
+  primary key(order_detail_id)
+);
 INSERT INTO categories (category_name, description)
 VALUES
   ('Beverages', 'Soft drinks, coffees, teas, beers, and ales'),
@@ -15,14 +36,6 @@ VALUES
   ('Produce', 'Dried fruit and bean curd'),
   ('Seafood', 'Seaweed and fish');
 
-CREATE TABLE products (
-  product_id INTEGER NOT NULL,
-  product_name VARCHAR(255),
-  category_id INTEGER,
-  unit VARCHAR(255),
-  price DECIMAL(10, 2),
-  primary key(product_id)
-);
 INSERT INTO products (product_id, product_name, category_id, unit, price)
 VALUES
   (1, 'Chais', 1, '10 boxes x 20 bags', 18),
@@ -102,13 +115,6 @@ VALUES
   (75, 'Rhenbreu Klosterbier', 1, '24 - 0.5 l bottles', 7.75),
   (76, 'Lakkalikeeri', 1, '500 ml ', 18),
   (77, 'Original Frankfurter gr�ne Soae', 2, '12 boxes', 13);
-
-CREATE TABLE orders (
-  order_id INTEGER NOT NULL,
-  customer_id INTEGER,
-  order_date DATE,
-  primary key(order_id)
-);
 
 INSERT INTO orders (order_id, customer_id, order_date)
 VALUES
@@ -943,13 +949,6 @@ VALUES
   (11076, 9, '2023-05-06'),
   (11077, 65, '2023-05-06');
 
-CREATE TABLE order_details (
-  order_detail_id INTEGER IDENTITY NOT NULL,
-  order_id INTEGER,
-  product_id INTEGER,
-  quantity INTEGER,
-  primary key(order_detail_id)
-);
 INSERT INTO order_details (order_id, product_id, quantity)
 VALUES
   (10248, 11, 12),
