@@ -72,13 +72,21 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 2.	Open Compute tab and connect to existing compute resource:
 - Add Compute → Connect to existing compute resources → Amazon Redshift Serverless
 - Endter the following configuration parameters:
-3.	Open Query Editor and select connection to the custom Redshift compute
+- 
+| Compute Type | Configuration parameters (from CloudFormation Outputs) |
+| ------------- | ------------- |
+| Amazon Redshift Serverless | Redshift compute: demo-wg <br/> Authentication – AWS Secrets Manager: {RedshiftSecretArn} <br/> Name: demo |
+
+### Create Zero-ETL Integrations
+#### Zero-ETL Integration between Redshift and Aurora PostgreSQL
+Open Query Editor and select connection to the custom Redshift compute
 - Run the following commands to create zero-etl database
 ```sql
 SELECT integration_id FROM SVV_INTEGRATION;
 -- copy integration_id
 CREATE DATABASE "zetlpg" FROM INTEGRATION 'integration_id' DATABASE "postgres";
 ```
+#### Zero-ETL Integration between Redshift and DynamoDB
 - Create provided table schema in the redshift local dev database and populate data. 
 - Copy Invoices data from Amazon DynamoDB into Redshift by running the following commands:
 ```sql
