@@ -243,21 +243,22 @@ Resources:
             Principal: "*"
             Sid: "misc"
 
-  BasicNotebookInstance:
+  Notebook:
     Type: AWS::SageMaker::NotebookInstance
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
     Properties:
       InstanceType: "ml.t3.medium"
-      RoleArn: !GetAtt ExecutionRole.Arn
-      DirectInternetAccess: "Disabled"
+      RoleArn: !GetAtt NotebookExecutionRole.Arn
+      DirectInternetAccess: "Enabled"
+      DefaultCodeRepository: "https://github.com/Natallia-Bahlai/sagemaker-unified-studio-quick-start.git"
       SecurityGroupIds: 
         - Ref: SecurityGroupId
       SubnetId: !Select 
         - 0
         - !Ref SubnetIds
 
-  ExecutionRole: 
+  NotebookExecutionRole: 
     Type: "AWS::IAM::Role"
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
@@ -275,7 +276,6 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
-        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
       
 Outputs:
