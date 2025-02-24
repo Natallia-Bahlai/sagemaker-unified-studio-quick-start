@@ -68,14 +68,17 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 3.	Review Output parameters
 
 ### Post Deployment
-1.	Login into Amazon SageMaker Unified Studio and open created Project
-2.	Open Compute tab and connect to existing compute resource:
+1.	In AWS Mngt Console, go to Amazon SageMaker AI, open the provisioned notebook and run scripts in [InitDataSources.ipynb](InitDataSources.ipynb) to init Aurora PostgreSQL and DynamoDB
+2.	In AWS Mngt Console, go to Amazon SageMaker, open Domain URL, login into Amazon SageMaker Unified Studio and go to the previously created Project
+3.	Open Compute tab and connect to existing compute resource:
 - Add Compute → Connect to existing compute resources → Amazon Redshift Serverless
 - Endter the following configuration parameters:
 - 
 | Compute Type | Configuration parameters (from CloudFormation Outputs) |
 | ------------- | ------------- |
 | Amazon Redshift Serverless | Redshift compute: demo-wg <br/> Authentication – AWS Secrets Manager: {RedshiftSecretArn} <br/> Name: demo |
+3. On **demo-wg.redshift** compute details page, select *Actions* → *Open Query Editor* and ensure selected data source in the right top corner is *Redshift (demo-wg.redshift) → dev → public*
+4. Run DDL + DML from [redshift.sql](sql/redshift.sql) to populate data in the redshift local dev database
 
 ### Create Zero-ETL Integrations
 #### Zero-ETL Integration between Redshift and Aurora PostgreSQL
@@ -87,7 +90,6 @@ SELECT integration_id FROM SVV_INTEGRATION;
 CREATE DATABASE "zetlpg" FROM INTEGRATION 'integration_id' DATABASE "postgres";
 ```
 #### Zero-ETL Integration between Redshift and DynamoDB
-- Create provided table schema in the redshift local dev database and populate data. 
 - Copy Invoices data from Amazon DynamoDB into Redshift by running the following commands:
 ```sql
 CREATE TABLE invoices (
@@ -98,8 +100,8 @@ primary key(invoice_number)
 COPY invoices from 'dynamodb://invoices'
 IAM_ROLE default
 readratio 50;
-
 ```
+![Zero-ETL Integrations](visuals/Zero-ETLSetup.png)
 
 ## SQL Analytics via Redshift Query Editor v2
 
@@ -127,7 +129,8 @@ Review the results:
 
 ### Generative SQL
 
-Now open Amazon Q and type the following question: what are the most ordered products?
+Now open Amazon Q and type the following question: *what are the most ordered products?*
+
 Amazon Q will generate SELECT statement similar to this one:
 
 ```sql
