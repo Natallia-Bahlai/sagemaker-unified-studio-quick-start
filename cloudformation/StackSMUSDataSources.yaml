@@ -223,7 +223,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Sub "${AWS::AccountId}"
               ArnEquals:
-                aws:SourceArn: "arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:integration:*"
+                aws:SourceArn: !Sub "arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:integration:*"
             Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/invoices/export/*"
             Action: "dynamodb:DescribeExport"
             Effect: "Allow"
@@ -251,23 +251,57 @@ Resources:
       InstanceType: "ml.t3.medium"
       RoleArn: !GetAtt NotebookExecutionRole.Arn
       DirectInternetAccess: "Enabled"
+      LifecycleConfigName: !GetAtt LifecycleConfig.NotebookInstanceLifecycleConfigName
       DefaultCodeRepository: "https://github.com/Natallia-Bahlai/sagemaker-unified-studio-quick-start.git"
       SecurityGroupIds: 
         - Ref: SecurityGroupId
       SubnetId: !Select 
         - 0
         - !Ref SubnetIds
+      Tags:
+        - Key: AmazonDataZoneProject
+          Value: !Ref AmazonDataZoneProject
+                           
+                                                                                                                     
+                                
+                                                                                                                                                                                                                                                                                                                                                                                                                        
+
+  LifecycleConfig:
+    Type: AWS::SageMaker::NotebookInstanceLifecycleConfig
+    UpdateReplacePolicy: "Retain"
+    DeletionPolicy: "Delete"
+    Properties:
+      NotebookInstanceLifecycleConfigName: !Sub "lifecycle-onstart"
+      OnStart:
+        - Content:
+            Fn::Base64:
+              !Sub |
+                #!/bin/bash
+                set -e
+                touch /etc/profile.d/jupyter-env.sh
+                echo "export PG_HOST=${RDSCluster.Endpoint.Address}" >> /etc/profile.d/jupyter-env.sh
+                echo "export PG_SECRET_ARN=${RDSCluster.MasterUserSecret.SecretArn}" >> /etc/profile.d/jupyter-env.sh
+                
+                # restart command is dependent on current running Amazon Linux and JupyterLab
+                CURR_VERSION=$(cat /etc/os-release)
+                if [[ $CURR_VERSION == *$"http://aws.amazon.com/amazon-linux-ami/"* ]]; then
+                    sudo initctl restart jupyter-server --no-wait
+                else
+                    sudo systemctl --no-block restart jupyter-server.service
+                fi
+                
+                #EOF
 
   NotebookExecutionRole: 
-    Type: "AWS::IAM::Role"
+    Type: AWS::IAM::Role
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
     Properties: 
       AssumeRolePolicyDocument: 
         Version: "2012-10-17"
         Statement: 
-          - 
-            Effect: "Allow"
+          - Effect: "Allow"
+                           
             Principal: 
               Service: 
                 - "sagemaker.amazonaws.com"
@@ -277,6 +311,15 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+      Policies:
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Resource: !GetAtt RDSCluster.MasterUserSecret.SecretArn
+            Action:
+            - "secretsmanager:GetSecretValue"
+            Effect: "Allow"
+        PolicyName: "sm"
       
 Outputs:
   AuroraPGHost:
