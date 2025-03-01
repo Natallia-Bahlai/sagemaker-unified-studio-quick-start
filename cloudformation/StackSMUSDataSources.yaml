@@ -188,13 +188,13 @@ Resources:
     Properties:
       TableName: invoices
       AttributeDefinitions:
-        - AttributeName: customer_id
+        - AttributeName: order_id
           AttributeType: N
         - AttributeName: invoice_number
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
       KeySchema:
-        - AttributeName: customer_id
+        - AttributeName: order_id
           KeyType: HASH 
         - AttributeName: invoice_number
           KeyType: RANGE
