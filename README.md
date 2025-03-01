@@ -93,7 +93,7 @@ CREATE DATABASE "zetlpg" FROM INTEGRATION 'integration_id' DATABASE "postgres";
 - Copy Invoices data from Amazon DynamoDB into Redshift by running the following commands:
 ```sql
 CREATE TABLE invoices (
-customer_id integer not null,
+order_id integer not null,
 invoice_number varchar(200) not null,
 total integer not null,
 status varchar(10) not null,
