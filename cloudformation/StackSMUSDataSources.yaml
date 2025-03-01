@@ -243,17 +243,6 @@ Resources:
             Principal: "*"
             Sid: "misc"
 
-  RDSMasterPWD:
-    Type: AWS::SSM::Parameter
-    UpdateReplacePolicy: "Retain"
-    DeletionPolicy: "Delete"
-    DependsOn: ["RDSCluster"]
-    Properties:
-      Description: Workaround
-      Name: "/rds/pwd"
-      Type: String
-      Value: !Join [ '', [ '{{resolve:secretsmanager:', !GetAtt RDSCluster.MasterUserSecret.SecretArn, ':SecretString:password}}' ] ]
-
   Notebook:
     Type: AWS::SageMaker::NotebookInstance
     UpdateReplacePolicy: "Retain"
@@ -272,16 +261,16 @@ Resources:
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
-                                                                                                                                       
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-                                                                                                            
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                     
+                                                                                                                                                        
+                                                                                                                                                                                            
+                        
 
   LifecycleConfig:
     Type: AWS::SageMaker::NotebookInstanceLifecycleConfig
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
-    DependsOn: ["RDSCluster", "RDSMasterPWD"]
+    DependsOn: ["RDSCluster"]
     Properties:
       NotebookInstanceLifecycleConfigName: !Sub "lifecycle-onstart"
       OnStart:
@@ -293,8 +282,6 @@ Resources:
                 touch /etc/profile.d/jupyter-env.sh
                 echo "export PG_HOST=${RDSCluster.Endpoint.Address}" >> /etc/profile.d/jupyter-env.sh
                 echo "export PG_SECRET_ARN=${RDSCluster.MasterUserSecret.SecretArn}" >> /etc/profile.d/jupyter-env.sh
-                echo "export PG_PWD=${RDSMasterPWD.Value}" >> /etc/profile.d/jupyter-env.sh
-                
                 # restart command is dependent on current running Amazon Linux and JupyterLab
                 CURR_VERSION=$(cat /etc/os-release)
                 if [[ $CURR_VERSION == *$"http://aws.amazon.com/amazon-linux-ami/"* ]]; then
@@ -314,7 +301,7 @@ Resources:
         Version: "2012-10-17"
         Statement: 
           - Effect: "Allow"
-                                                                                                                                       
+                  
             Principal: 
               Service: 
                 - "sagemaker.amazonaws.com"
