@@ -131,7 +131,9 @@ Review the results:
 
 ### Generative SQL
 
-Now open Amazon Q and type the following question: *what are the most ordered products?*
+Now open Amazon Q and type the following question: 
+
+**Question:** *What are the most ordered products?*
 
 Amazon Q will generate SELECT statement similar to this one:
 
@@ -150,6 +152,25 @@ ORDER BY
 Click 'Add to querybook' and execute to confirm the results.
 
 ![Redshift Query Editor v2](visuals/Generative%20SQL.png)
+
+**Question:** *Identify all product categories associated with invoices that are currently in draft status. Include the outstanding amounts for these invoices.*
+
+Amazon Q will generate SELECT statement similar to this one:
+
+```sql
+SELECT
+  c."category_name",
+  SUM(i."total") AS "outstanding_amount"
+FROM
+  "public"."categories" c
+  JOIN "public"."products" p ON c."category_id" = p."category_id"
+  JOIN "public"."order_details" od ON p."product_id" = od."product_id"
+  JOIN "public"."invoices" i ON od."order_id" = i."order_id"
+WHERE
+  i."status" = 'DRAFT'
+GROUP BY
+  c."category_name";
+```
 
 ## SQL Analytics via Amazon Athena
 
