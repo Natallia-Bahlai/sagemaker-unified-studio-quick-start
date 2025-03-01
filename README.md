@@ -52,7 +52,7 @@ These prerequisites must be completed in AWS Management Console
 - Copy Amazon SageMaker Unified Studio URL
 
 Next steps must be completed from Amazon SageMaker Unified Studio
-- Open Amazon SageMaker Unified Studio URL and login as given user
+- Open Amazon SageMaker Unified Studio URL and login as a given user
 - Create project with project profile: Data analytics and AI-ML model development
 - Go to Project overview and copy Project ID and Project IAM Role ARN containing: datazone_usr_role_{ProjectID}_{EnvironmentID}
 
@@ -70,7 +70,7 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 ### Post Deployment
 1.	In AWS Mngt Console, go to Amazon SageMaker AI, open the provisioned notebook and run scripts in [InitDataSources.ipynb](InitDataSources.ipynb) to init Aurora PostgreSQL and DynamoDB
 2.	In AWS Mngt Console, go to Amazon SageMaker, open Domain URL, login into Amazon SageMaker Unified Studio and go to the previously created Project
-3.	Open Compute tab and connect to existing compute resource:
+3.	Open Compute tab and connect the existing compute resource:
 - Add Compute → Connect to existing compute resources → Amazon Redshift Serverless
 - Endter the following configuration parameters:
 
@@ -95,8 +95,10 @@ CREATE DATABASE "zetlpg" FROM INTEGRATION 'integration_id' DATABASE "postgres";
 CREATE TABLE invoices (
 customer_id integer not null,
 invoice_number varchar(200) not null,
+total integer not null,
+status varchar(10) not null,
 primary key(invoice_number)
-)
+);
 COPY invoices from 'dynamodb://invoices'
 IAM_ROLE default
 readratio 50;
