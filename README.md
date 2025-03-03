@@ -47,7 +47,7 @@ These prerequisites must be completed in AWS Management Console
 2.	Create Amazon SageMaker Domain in AWS Mngt console
 - Open AWS Mngt console and go to Amazon SageMaker
 - Create a Unified Studio domain
-- Select Quick Setup and select VPC with 3 subnets.
+- Select Quick Setup and select VPC with 3 subnets. If you choose to *Create VPC*, CloudFormation template provisions properly-configured VPC with necessary VPC endpoints. 
 - Create IAM Identity Center user with a given email and accept invitation to activate user
 - Copy Amazon SageMaker Unified Studio URL
 
@@ -64,7 +64,7 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 - [x] Security Group ID from Security Group with name datazone-{ProjectID}-dev
 - [x] Project ID
 - [x] Project IAM Role ARN
-2.	Deploy provided CloudFormation Templates: [StackSMUSDataSources.yaml](cloudformation/StackSMUSDataSources.yaml), [StackSMUSVPCEndpoints.yaml](cloudformation/StackSMUSVPCEndpoints.yaml)  and specify parameters
+2.	Deploy provided CloudFormation Templates: [StackSMUSDataSources.yaml](cloudformation/StackSMUSDataSources.yaml) and specify parameters. If you have not created VPC as part of Domain setup, then run [StackSMUSVPCEndpoints.yaml](cloudformation/StackSMUSVPCEndpoints.yaml) to create necessary VPC Endpoints: STS, Secrets Manager, Glue, RDS Data, Redshift Data, Redshift Serverless Interface endpoints and S3 Gateway endpoint.
 3.	Review Output parameters
 
 ### Post Deployment
