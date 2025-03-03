@@ -35,8 +35,12 @@ In this post we will cover the following zero-ETL integration options:
 -	Federated Query of data in Amazon Aurora and Amazon DynamoDB through Amazon Athena. This direction queries data in place
 -	Zero-ETL replication from Amazon Aurora and Amazon DynamoDB based on a given interval automatically. This direction queries replicated data within Amazon Redshift
 -	Zero-ETL replication from Amazon DynamoDB by running COPY command
--	
+
 ![Zero-ETL integrations](visuals/DemoZero-ETL.png)
+
+Here is the feature comparison of Zero-ETL options in context of Amazon SageMaker Unified Studio:
+
+![Zero-ETL Options - Comparison](visuals/Zero-ETLComparison.png)
 
 ## Deployment
 
