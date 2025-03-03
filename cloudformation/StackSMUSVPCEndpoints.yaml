@@ -11,7 +11,11 @@ Parameters:
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: PublicSubnet1
+    Description: Selected Subnets. us-east-1 supports only 1b, 1c, 1d AZs for Redshift Serverless Endpoint.
+
+  RouteTableId:
+    Type: String
+    Description: RouteTableId. Used to enabled S3 Gateway endpoint.
 
 Resources:        
   VPCEndpointSecretsManager:
@@ -22,17 +26,6 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.secretsmanager"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
@@ -46,17 +39,6 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.sts"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
@@ -70,17 +52,6 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.glue"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
@@ -94,21 +65,10 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.rds-data"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
-        - !Ref SecurityGroupId 
+        - !Ref SecurityGroupId
 
   VPCEndpointRedshiftData:
     Type: "AWS::EC2::VPCEndpoint"
@@ -118,17 +78,6 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.redshift-data"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
@@ -142,18 +91,17 @@ Resources:
       VpcEndpointType: "Interface"
       VpcId: !Ref VpcId
       ServiceName: !Sub "com.amazonaws.${AWS::Region}.redshift-serverless"
-      PolicyDocument: |
-        {
-          "Statement": [
-            {
-              "Action": "*", 
-              "Effect": "Allow", 
-              "Principal": "*", 
-              "Resource": "*"
-            }
-          ]
-        }
       SubnetIds: !Ref SubnetIds
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref SecurityGroupId
+
+  EndpointS3:
+    Type: "AWS::EC2::VPCEndpoint"
+    Properties:
+      RouteTableIds:
+        - !Ref RouteTableId
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      VpcEndpointType: "Gateway"
+      VpcId: !Ref VpcId 
+

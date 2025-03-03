@@ -22,7 +22,7 @@ Parameters:
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: PublicSubnet1
+    Description: Selected Subnets. Private subnets are recommended. us-east-1 supports only 1b, 1c, 1d AZs for Redshift Serverless Endpoint.
 
   AmazonDataZoneProject:
     Type: String
