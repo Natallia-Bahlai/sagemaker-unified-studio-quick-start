@@ -181,10 +181,11 @@ GROUP BY
 Now lets connect federated data sources. 
 In Query Editor click on '+' and Add Data – Add Connection – Select connection type and specify configuration parameters:
 
-| Connection Type  | Configuration parameters (from CloudFormation Outputs) |
+| Connection Type  | Configuration parameters ({x} from CloudFormation Outputs) |
 | ------------- | ------------- |
 | Amazon Aurora PostgreSQL | Name: demo-aurorapg <br> Host: {AuroraPGHost} <br> Port: {AuroraPGPort} <br> Database: {AuroraPGDatabase} <br> Authentification : AWS Secrets Manager: {AuroraPGSecretArn} |
 | Amazon Redshift Serverless  | Name: demo-redshift <br> Host: {RedshiftHost} <br> Port: {RedshiftPort} <br> Database: {RedshiftDatabase} <br> Authentification : AWS Secrets Manager: {RedshiftSecretArn} |
+| Amazon DynamoDB | Name: demo-ddb |
 
 Once connections are established successfully, expand connection, select target table and click on '⋮' to query with Amazon Athena
 
