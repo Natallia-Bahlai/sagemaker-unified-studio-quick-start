@@ -185,6 +185,20 @@ GROUP BY
   c."category_name";
 ```
 
+**Questions:** *Show a list of customers with unpaid invoices? Statuses of unpaid invoises are SUBMITTED and AUTHORISED*
+
+Amazon Q will generate SELECT statement similar to this one:
+
+```sql
+SELECT DISTINCT
+  o.customer_id
+FROM
+  "public".orders o
+  JOIN "public".invoices i ON o.order_id = i.order_id
+WHERE
+  i.status IN ('SUBMITTED', 'AUTHORISED');
+```
+
 ## SQL Analytics via Amazon Athena
 
 Now let’s query the federated data sources such as Amazon DynamoDB, Aurora PostgreSQL, Redshift Serverless. Once connections to the federated sources are established successfully, expand connection, select target table and click on '⋮' to query with Amazon Athena
