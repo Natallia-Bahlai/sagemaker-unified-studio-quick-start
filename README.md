@@ -1,6 +1,23 @@
 # Demystifying Data Analytics in Amazon SageMaker Unified Studio
 > [!NOTE]
-> Quick Start with demo CloudFormation resources
+> - Mental Model to understand the structure of Amazon SageMaker Unified Studio and Amazon SageMaker Lakehouse in no time
+> - Quick Start demo provisioned through CloudFormation resources
+
+## Amazon SageMaker Unified Studio
+![Amazon SageMaker Unified Studio](visuals/SageMakerUnifiedStudio.png)
+[Amazon SageMaker Unified Studio](https://aws.amazon.com/sagemaker/unified-studio/) provides an integrated environment for domain-specific data projects. The environment is provisioned through AWS-managed blueprints powered by CloudFormation templates and organized into specialized projects ranging from SQL analytics, data exploration and processing, AI model development and training to GenAI applicarion development.
+
+Users authenticated via IAM or SSO can work within these projects to unlock the value of data by:
+- Connecting multiple data sources, including Amazon S3 data lakes, Amazon Redshift data warehouses and managed storage, and federated sources
+- Unifying these sources through the Amazon SageMaker Lakehouse and registering in data catalogs
+- Analyzing data using query engines like Amazon Athena or Amazon Redshift Query Editor v2, or exploring and processing data programmatically using JupyterLab Notebooks
+- Governing unified and shared data access through assets exposed via a business catalog
+
+Projects in Amazon SageMaker Unified Studio also serve as collaboration and permission boundaries, with consistent access policies using a single permission model with granular controls.
+
+Amazon SageMaker Unified Studio makes it easy for customers to find and access data from across their organization and brings together purpose-built AWS analytics, AI/ML capabilities so customers can act on their data using the best tool for the job across all types of common data use cases, assisted by Amazon Q Developer along the way.
+
+
 ## Amazon SageMaker Lakehouse
 ![Amazon SageMaker Lakehouse](visuals/SageMakerLakehouse.png)
 **Amazon SageMaker Lakehouse** is a capability that unifies data across Amazon S3 data lakes, Amazon Redshift data warehouses and Redshift managed storage (RMS catalogs), enabling you to build powerful analytics and AI/ML applications on a single copy of data. In addition to seamlessly accessing data from these sources, you can connect to operational databases and third-party data sources and query data in-place with federated query capabilities. Through AWS Glue zero-ETL replication, you can bring data from operational databases (such as Amazon Aurora, Amazon RDS for MySQL, Amazon DynamoDB), and SaaS sources (like Salesforce and SAP), and load data into Amazon Redshift data warehouse or Redshift managed storage without writing any ETL job.
@@ -211,3 +228,18 @@ select * from "demo-aurorapg"."public"."customers" limit 10;
 select * from "demo-redshift"."public"."invoices" limit 10;
 select * from "demo-dynamodb"."default"."invoices" limit 10;
 ```
+## References
+[Amazon SageMaker Unified Studio](https://aws.amazon.com/sagemaker/unified-studio/)
+
+[Amazon SageMaker Lakehouse](https://aws.amazon.com/sagemaker/lakehouse/)
+
+[What is zero-ETL?](https://aws.amazon.com/what-is/zero-etl/)
+
+[Amazon DynamoDB Zero-ETL integrations](https://aws.amazon.com/dynamodb/integrations/)
+
+### Feature releases
+[Amazon DynamoDB zero-ETL integration with Amazon SageMaker Lakehouse](https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-dynamo-db-zero-etl-integration-sagemaker-lakehouse/)
+
+[Amazon DynamoDB zero-ETL integration with Amazon Redshift](https://aws.amazon.com/about-aws/whats-new/2024/10/amazon-dynamodb-zero-etl-integration-redshift/)
+
+[Amazon Aurora PostgreSQL zero-ETL integration with Amazon Redshift](https://aws.amazon.com/about-aws/whats-new/2024/10/amazon-aurora-postgresql-zero-etl-integration-redshift-generally-available/)
