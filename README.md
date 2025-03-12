@@ -1,6 +1,23 @@
 # Demystifying Data Analytics in Amazon SageMaker Unified Studio
 > [!NOTE]
-> Quick Start with demo CloudFormation resources
+> - Mental Model to understand the structure of Amazon SageMaker Unified Studio and Amazon SageMaker Lakehouse in no time
+> - Quick Start demo provisioned through CloudFormation resources
+
+## Amazon SageMaker Unified Studio
+![Amazon SageMaker Unified Studio](visuals/SageMakerUnifiedStudio.png)
+[Amazon SageMaker Unified Studio](https://aws.amazon.com/sagemaker/unified-studio/) provides an integrated environment for domain-specific data projects. The environment is provisioned through AWS-managed blueprints powered by CloudFormation templates and organized into specialized projects ranging from SQL analytics, data exploration and processing, AI model development and training to GenAI applicarion development.
+
+Users authenticated via IAM or SSO can work within these projects to unlock the value of data by:
+- Connecting multiple data sources, including Amazon S3 data lakes, Amazon Redshift data warehouses and managed storage, and federated sources
+- Unifying these sources through the Amazon SageMaker Lakehouse and registering in data catalogs
+- Analyzing data using query engines like Amazon Athena or Amazon Redshift Query Editor v2, or exploring and processing data programmatically using JupyterLab Notebooks
+- Governing unified and shared data access through assets exposed via a business catalog
+
+Projects in Amazon SageMaker Unified Studio also serve as collaboration and permission boundaries, with consistent access policies using a single permission model with granular controls.
+
+Amazon SageMaker Unified Studio makes it easy for customers to find and access data from across their organization and brings together purpose-built AWS analytics, AI/ML capabilities so customers can act on their data using the best tool for the job across all types of common data use cases, assisted by Amazon Q Developer along the way.
+
+
 ## Amazon SageMaker Lakehouse
 ![Amazon SageMaker Lakehouse](visuals/SageMakerLakehouse.png)
 **Amazon SageMaker Lakehouse** is a capability that unifies data across Amazon S3 data lakes, Amazon Redshift data warehouses and Redshift managed storage (RMS catalogs), enabling you to build powerful analytics and AI/ML applications on a single copy of data. In addition to seamlessly accessing data from these sources, you can connect to operational databases and third-party data sources and query data in-place with federated query capabilities. Through AWS Glue zero-ETL replication, you can bring data from operational databases (such as Amazon Aurora, Amazon RDS for MySQL, Amazon DynamoDB), and SaaS sources (like Salesforce and SAP), and load data into Amazon Redshift data warehouse or Redshift managed storage without writing any ETL job.
@@ -74,15 +91,24 @@ Next steps must be completed from Amazon SageMaker Unified Studio
 ### Post Deployment
 1.	In AWS Mngt Console, go to Amazon SageMaker AI, open the provisioned notebook and run scripts in [InitDataSources.ipynb](InitDataSources.ipynb) to init Aurora PostgreSQL and DynamoDB
 2.	In AWS Mngt Console, go to Amazon SageMaker, open Domain URL, login into Amazon SageMaker Unified Studio and go to the previously created Project
-3.	Open Compute tab and connect the existing compute resource:
+3.  Open Data tab, click on '+' and then choose Add Data → Add Connection → Select connection type and specify configuration parameters where {x} are located in the CloudFormation Outputs:
+
+| Connection Type  | Configuration parameters ({x} from CloudFormation Outputs) |
+| ------------- | ------------- |
+| Amazon Aurora PostgreSQL | Name: demo-aurorapg <br> Host: {AuroraPGHost} <br> Port: {AuroraPGPort} <br> Database: {AuroraPGDatabase} <br> Authentification : AWS Secrets Manager: {AuroraPGSecretArn} |
+| Amazon Redshift Serverless  | Name: demo-redshift <br> Host: {RedshiftHost} <br> Port: {RedshiftPort} <br> Database: {RedshiftDatabase} <br> Authentification : AWS Secrets Manager: {RedshiftSecretArn} |
+| Amazon DynamoDB | Name: demo-ddb |
+   
+5.	Open Compute tab and connect the existing compute resource:
 - Add Compute → Connect to existing compute resources → Amazon Redshift Serverless
 - Endter the following configuration parameters:
+- On **demo-wg.redshift** compute details page, select *Actions* → *Open Query Editor* and ensure selected data source in the right top corner is *Redshift (demo-wg.redshift) → dev → public*
+- Run DDL + DML from [redshift.sql](sql/redshift.sql) to populate data in the redshift local dev database
 
 | Compute Type | Configuration parameters (from CloudFormation Outputs) |
 | ------------- | ------------- |
 | Amazon Redshift Serverless | Redshift compute: demo-wg <br/> Authentication : AWS Secrets Manager: {RedshiftSecretArn} <br/> Name: demo |
-3. On **demo-wg.redshift** compute details page, select *Actions* → *Open Query Editor* and ensure selected data source in the right top corner is *Redshift (demo-wg.redshift) → dev → public*
-4. Run DDL + DML from [redshift.sql](sql/redshift.sql) to populate data in the redshift local dev database
+
 
 ### Create Zero-ETL Integrations
 #### Zero-ETL Integration between Redshift and Aurora PostgreSQL
@@ -176,18 +202,44 @@ GROUP BY
   c."category_name";
 ```
 
+**Questions:** *Show a list of customers with unpaid invoices? Statuses of unpaid invoises are SUBMITTED and AUTHORISED*
+
+Amazon Q will generate SELECT statement similar to this one:
+
+```sql
+SELECT DISTINCT
+  o.customer_id
+FROM
+  "public".orders o
+  JOIN "public".invoices i ON o.order_id = i.order_id
+WHERE
+  i.status IN ('SUBMITTED', 'AUTHORISED');
+```
+
 ## SQL Analytics via Amazon Athena
 
-Now lets connect federated data sources. 
-In Query Editor click on '+' and Add Data – Add Connection – Select connection type and specify configuration parameters:
-
-| Connection Type  | Configuration parameters ({x} from CloudFormation Outputs) |
-| ------------- | ------------- |
-| Amazon Aurora PostgreSQL | Name: demo-aurorapg <br> Host: {AuroraPGHost} <br> Port: {AuroraPGPort} <br> Database: {AuroraPGDatabase} <br> Authentification : AWS Secrets Manager: {AuroraPGSecretArn} |
-| Amazon Redshift Serverless  | Name: demo-redshift <br> Host: {RedshiftHost} <br> Port: {RedshiftPort} <br> Database: {RedshiftDatabase} <br> Authentification : AWS Secrets Manager: {RedshiftSecretArn} |
-| Amazon DynamoDB | Name: demo-ddb |
-
-Once connections are established successfully, expand connection, select target table and click on '⋮' to query with Amazon Athena
+Now let’s query the federated data sources such as Amazon DynamoDB, Aurora PostgreSQL, Redshift Serverless. Once connections to the federated sources are established successfully, expand connection, select target table and click on '⋮' to query with Amazon Athena
 
 ![Redshift Query Editor v2](visuals/Athena.png)
 
+Here are sample queries to try:
+```sql
+select * from "demo-aurorapg"."public"."customers" limit 10;
+select * from "demo-redshift"."public"."invoices" limit 10;
+select * from "demo-dynamodb"."default"."invoices" limit 10;
+```
+## References
+[Amazon SageMaker Unified Studio](https://aws.amazon.com/sagemaker/unified-studio/)
+
+[Amazon SageMaker Lakehouse](https://aws.amazon.com/sagemaker/lakehouse/)
+
+[What is zero-ETL?](https://aws.amazon.com/what-is/zero-etl/)
+
+[Amazon DynamoDB Zero-ETL integrations](https://aws.amazon.com/dynamodb/integrations/)
+
+### Feature releases
+[Amazon DynamoDB zero-ETL integration with Amazon SageMaker Lakehouse](https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-dynamo-db-zero-etl-integration-sagemaker-lakehouse/)
+
+[Amazon DynamoDB zero-ETL integration with Amazon Redshift](https://aws.amazon.com/about-aws/whats-new/2024/10/amazon-dynamodb-zero-etl-integration-redshift/)
+
+[Amazon Aurora PostgreSQL zero-ETL integration with Amazon Redshift](https://aws.amazon.com/about-aws/whats-new/2024/10/amazon-aurora-postgresql-zero-etl-integration-redshift-generally-available/)
