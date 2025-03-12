@@ -47,7 +47,6 @@ Resources:
     Type: "AWS::RDS::DBCluster"
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
-    DependsOn: RDSDBSubnetGroup
     Properties:
       DBClusterIdentifier: demo-cluster
       ManageMasterUserPassword: true
@@ -68,7 +67,6 @@ Resources:
     Type: "AWS::RDS::DBInstance"
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
-    DependsOn: RDSCluster
     Properties:
       DBInstanceIdentifier: demo-instance
       #DBName: "postgres"
@@ -103,7 +101,6 @@ Resources:
     Type: AWS::RedshiftServerless::Namespace
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
-    DependsOn: RedshiftAdminSecret
     Properties:
       NamespaceName: "demo-ns"
       DbName: "dev"
@@ -133,7 +130,6 @@ Resources:
 
   RedshiftServerlessWG:
     Type: AWS::RedshiftServerless::Workgroup
-    DependsOn: RedshiftServerlessNS
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
     Properties:
@@ -261,16 +257,12 @@ Resources:
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
-                                     
-                                                                                                                                                        
-                                                                                                                                                                                            
                         
 
   LifecycleConfig:
     Type: AWS::SageMaker::NotebookInstanceLifecycleConfig
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
-    DependsOn: ["RDSCluster"]
     Properties:
       NotebookInstanceLifecycleConfigName: !Sub "lifecycle-onstart"
       OnStart:
