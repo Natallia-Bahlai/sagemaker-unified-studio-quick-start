@@ -11,7 +11,7 @@ Parameters:
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: Selected Subnets. us-east-1 supports only 1b, 1c, 1d AZs for Redshift Serverless Endpoint.
+    Description: Selected Subnets. us-east-1 supports only 1a, 1b, 1d AZs (AZ ids: use1-az1, use1-az2, use1-az6) for Redshift Serverless Endpoint.
 
   RouteTableId:
     Type: String
