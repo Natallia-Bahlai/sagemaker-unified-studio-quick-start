@@ -1,3 +1,5 @@
+-- Source: https://www.w3schools.com/postgresql/postgresql_create_demodatabase.php
+-- Note: Original PostgreSQL DDL statements modified for Amazon Redshift compatibility
 CREATE TABLE categories (
   category_id INTEGER IDENTITY NOT NULL,
   category_name VARCHAR(255),

@@ -1,3 +1,4 @@
+-- Source: https://www.w3schools.com/postgresql/postgresql_create_demodatabase.php
 
 CREATE TABLE customers (
   customer_id SERIAL NOT NULL PRIMARY KEY,
