@@ -59,6 +59,9 @@ Resources:
       DBClusterParameterGroupName: !Ref ZeroETLDBClusterParameterGroup
       StorageEncrypted: true
       BackupRetentionPeriod: 1
+      EnableIAMDatabaseAuthentication: true
+      DeletionProtection: false
+      EnableCloudwatchLogsExports: [ error, slowquery ]
       VpcSecurityGroupIds:
         - !Ref SecurityGroupId
       Tags:
@@ -78,6 +81,8 @@ Resources:
       DBInstanceClass: "db.t4g.medium"
       MonitoringInterval: 0
       AutoMinorVersionUpgrade: true
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
       StorageEncrypted: true
       Tags:
         - Key: "AmazonDataZoneProject"
