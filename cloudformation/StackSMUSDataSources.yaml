@@ -83,7 +83,6 @@ Resources:
       #EnablePerformanceInsights: true
       #PerformanceInsightsRetentionPeriod: 1
       StorageEncrypted: true
-      #BackupRetentionPeriod: 1 #Set backup retention period for the DB Cluster
       Tags:
         - Key: "AmazonDataZoneProject"
           Value: !Ref AmazonDataZoneProject
@@ -259,8 +258,8 @@ Resources:
         PointInTimeRecoveryEnabled: true
       SSESpecification:
         SSEEnabled: true
-        #SSEType: KMS
-        #KMSMasterKeyId: !Ref KMSEncryptionKey.Arn
+        SSEType: KMS
+        KMSMasterKeyId: !Ref KMSEncryptionKey
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
