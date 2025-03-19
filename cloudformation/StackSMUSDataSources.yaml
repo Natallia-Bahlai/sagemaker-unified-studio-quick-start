@@ -83,7 +83,7 @@ Resources:
       #EnablePerformanceInsights: true
       #PerformanceInsightsRetentionPeriod: 1
       StorageEncrypted: true
-      BackupRetentionPeriod: 1
+      #BackupRetentionPeriod: 1 #Set backup retention period for the DB Cluster
       Tags:
         - Key: "AmazonDataZoneProject"
           Value: !Ref AmazonDataZoneProject
@@ -259,8 +259,8 @@ Resources:
         PointInTimeRecoveryEnabled: true
       SSESpecification:
         SSEEnabled: true
-        SSEType: KMS
-        KMSMasterKeyId: !Ref KMSEncryptionKey
+        #SSEType: KMS
+        #KMSMasterKeyId: !Ref KMSEncryptionKey.Arn
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
@@ -317,7 +317,7 @@ Resources:
       PlatformIdentifier: notebook-al2-v3
       SecurityGroupIds: 
         - Ref: SecurityGroupId
-      KMSMasterKeyId: !Ref KMSEncryptionKey
+      KmsKeyId: !Ref KMSEncryptionKey
       SubnetId: !Select 
         - 0
         - !Ref SubnetIds
