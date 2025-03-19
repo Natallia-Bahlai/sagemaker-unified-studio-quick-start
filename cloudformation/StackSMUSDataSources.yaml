@@ -70,7 +70,7 @@ Resources:
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
     Properties:
-      DBInstanceIdentifier: demo-instance
+      #DBInstanceIdentifier: demo-instance
       #DBName: "postgres"
       Engine: "aurora-postgresql"
       DBClusterIdentifier: !Ref RDSCluster
@@ -81,6 +81,44 @@ Resources:
       StorageEncrypted: true
       Tags:
         - Key: "AmazonDataZoneProject"
+          Value: !Ref AmazonDataZoneProject
+
+
+          
+  KMSEncryptionKey:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::KMS::Key"
+    DeletionPolicy: "Delete"
+    Properties:
+      Origin: "AWS_KMS"
+      MultiRegion: false
+      Description: "Default key to protect AppFlow data"
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Condition:
+            StringEquals:
+              kms:ViaService: !Sub "secretsmanager.${AWS::Region}.amazonaws.com"
+              kms:CallerAccount: !Ref AWS::AccountId
+          Resource: "*"
+          Action:
+          - "kms:*"
+          Effect: "Allow"
+          Principal:
+            AWS: "*"
+        - Resource: "*"
+          Action:
+          - "kms:*"
+          Effect: "Allow"
+          Principal:
+            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+        Id: "sid"
+      KeySpec: "SYMMETRIC_DEFAULT"
+      Enabled: true
+      EnableKeyRotation: true
+      KeyUsage: "ENCRYPT_DECRYPT"
+      Tags:
+        - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
 
   RedshiftAdminSecret:
@@ -97,18 +135,10 @@ Resources:
         IncludeSpace: false
         ExcludePunctuation: true
         ExcludeCharacters: '"@/\'
+      KmsKeyId: !Ref KMSEncryptionKey
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
-          
-    MySecretRotationSchedule:
-        Type: AWS::SecretsManager::RotationSchedule
-        DependsOn: SecretRDSInstanceAttachment
-        Properties:
-            SecretId: !Ref MyRDSSecret
-            RotationLambdaARN: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SecretsManagerMySQLRotationFunction'
-            RotationRules:
-                AutomaticallyAfterDays: 30
 
   RedshiftServerlessNS:
     Type: AWS::RedshiftServerless::Namespace
@@ -216,6 +246,8 @@ Resources:
           KeyType: RANGE
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
       Tags:
         - Key: AmazonDataZoneProject
           Value: !Ref AmazonDataZoneProject
@@ -269,6 +301,7 @@ Resources:
       DirectInternetAccess: "Enabled"
       LifecycleConfigName: !GetAtt LifecycleConfig.NotebookInstanceLifecycleConfigName
       DefaultCodeRepository: "https://github.com/Natallia-Bahlai/sagemaker-unified-studio-quick-start.git"
+      PlatformIdentifier: notebook-al2-v3
       SecurityGroupIds: 
         - Ref: SecurityGroupId
       SubnetId: !Select 
@@ -313,16 +346,21 @@ Resources:
       AssumeRolePolicyDocument: 
         Version: "2012-10-17"
         Statement: 
-          - Effect: "Allow"
-                  
+          - Effect: "Allow"                  
             Principal: 
               Service: 
                 - "sagemaker.amazonaws.com"
             Action: 
               - "sts:AssumeRole"
       Path: "/"
-      Policies:
-      - PolicyDocument:
+
+  NotebookExecutionRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref NotebookExecutionRole
+      PolicyName: NotebookExecutionRolePolicy
+      PolicyDocument:
           Version: "2012-10-17"
           Statement:
           - Resource: !GetAtt RDSCluster.MasterUserSecret.SecretArn
@@ -334,7 +372,6 @@ Resources:
             Action:
             - "dynamodb:BatchWriteItem"
             Effect: "Allow"
-        PolicyName: "misc"
 
 Outputs:
   AuroraPGHost:
