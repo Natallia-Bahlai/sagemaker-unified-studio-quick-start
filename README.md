@@ -228,6 +228,83 @@ select * from "demo-aurorapg"."public"."customers" limit 10;
 select * from "demo-redshift"."public"."invoices" limit 10;
 select * from "demo-dynamodb"."default"."invoices" limit 10;
 ```
+
+### Connecting to Snowflake
+
+Create demo warehouse, user, role and sample data by running these commands in Snowflake:
+
+```sql
+-- Create warehouse
+CREATE WAREHOUSE "demo_wh" WITH 
+    WAREHOUSE_SIZE = 'X-SMALL'
+    MIN_CLUSTER_COUNT = 1
+    MAX_CLUSTER_COUNT = 1
+    AUTO_SUSPEND = 600  -- 10 minutes
+    AUTO_RESUME = TRUE
+    INITIALLY_SUSPENDED = TRUE
+    SCALING_POLICY = 'STANDARD';
+
+-- Grant usage
+GRANT USAGE ON WAREHOUSE "demo_wh" TO ROLE PUBLIC;
+
+-- Create a specific role
+CREATE ROLE demo_role;
+
+-- Create user
+CREATE USER demo_user
+    PASSWORD = '******'  -- use a strong password
+    DEFAULT_ROLE = demo_role
+    DEFAULT_WAREHOUSE = "demo_wh"
+    MUST_CHANGE_PASSWORD = FALSE;
+
+-- Assign the role to user
+GRANT ROLE demo_role TO USER demo_user;
+
+-- Grant warehouse access
+GRANT USAGE ON WAREHOUSE "demo_wh" TO ROLE demo_role;
+
+--ALTER USER demo_user SET DEFAULT_WAREHOUSE = "demo_wh";
+
+CREATE DATABASE "demo_db";
+CREATE SCHEMA "demo_schema";
+
+-- Create customer table
+CREATE TABLE "demo_db"."demo_schema"."customer" (
+    "customer_id" INTEGER,
+    "first_name" VARCHAR(50),
+    "email" VARCHAR(100),
+    "city" VARCHAR(50),
+    "total_orders" INTEGER
+);
+
+-- Insert sample data
+INSERT INTO "demo_db"."demo_schema"."customer" 
+VALUES 
+    (1, 'John', 'john.doe@email.com', 'New York', 5),
+    (2, 'Emma', 'emma.smith@email.com', 'Los Angeles', 3),
+    (3, 'Michael', 'michael.brown@email.com', 'Chicago', 7),
+    (4, 'Sarah', 'sarah.wilson@email.com', 'Houston', 2),
+    (5, 'David', 'david.lee@email.com', 'Seattle', 4),
+    (6, 'Lisa', 'lisa.anderson@email.com', 'Boston', 6),
+    (7, 'James', 'james.taylor@email.com', 'Miami', 1),
+    (8, 'Maria', 'maria.garcia@email.com', 'Denver', 8),
+    (9, 'Robert', 'robert.miller@email.com', 'Phoenix', 3),
+    (10, 'Jennifer', 'jennifer.davis@email.com', 'Portland', 5);
+
+-- Grant access
+GRANT USAGE ON DATABASE "demo_db" TO ROLE demo_role;
+GRANT USAGE ON SCHEMA "demo_db"."demo_schema" TO ROLE demo_role;
+GRANT SELECT ON TABLE "demo_db"."demo_schema"."customer" TO ROLE demo_role;
+```
+
+Open Amazon SageMaker Unified Studio Project and go to Data tab. Click on '+' and then choose Add Data → Add Connection → Select connection type Snowflake  and specify configuration parameters:
+
+| Connection Type  | Configuration parameters |
+| ------------- | ------------- |
+| Snowflake | Name: demo-snowflake <br> Host: {account}.snowflakecomputing.com <br> Port: 443 <br> Database: demo_db <br> Warehouse: demo_wh <br> Authentification : AWS Secrets Manager: demo_user |
+
+Once connection is established successfully, expand connection, select target table and click on '⋮' to query with Amazon Athena
+
 ## References
 [Amazon SageMaker Unified Studio](https://aws.amazon.com/sagemaker/unified-studio/)
 
