@@ -22,7 +22,7 @@ Parameters:
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: Selected Subnets. Private subnets are recommended. us-east-1 supports only 1b, 1c, 1d AZs for Redshift Serverless Endpoint.
+    Description: Selected Subnets. us-east-1 supports only use1-az1, use1-az2, use1-az6 AZ IDs for Redshift Serverless Endpoint.
 
   AmazonDataZoneProject:
     Type: String
@@ -331,7 +331,6 @@ Resources:
     UpdateReplacePolicy: "Retain"
     DeletionPolicy: "Delete"
     Properties:
-      NotebookInstanceLifecycleConfigName: !Sub "lifecycle-onstart"
       OnStart:
         - Content:
             Fn::Base64:
